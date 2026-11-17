@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Home Automation System</title>
+
+<style>
+:root {
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --text: #182230;
+  --muted: #687588;
+  --primary: #3563e9;
+  --primary-soft: #eaf0ff;
+  --border: #e5eaf1;
+  --shadow: 0 8px 28px rgba(24,34,48,.07);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button { font: inherit; cursor: pointer; }
+
+.layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 245px 1fr;
+}
+
+aside {
+  background: #111c31;
+  color: white;
+  padding: 25px 17px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 19px;
+  font-weight: bold;
+  padding: 4px 10px 30px;
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #3563e9;
+  font-size: 21px;
+}
+
+.nav-label {
+  color: #8390a6;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  padding: 0 12px 10px;
+}
+
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  color: #c5cede;
+  background: transparent;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: left;
+  margin: 3px 0;
+}
+
+.nav button.active,
+.nav button:hover {
+  background: #243552;
+  color: white;
+}
+
+.nav .ico {
+  width: 20px;
+  text-align: center;
+  font-size: 17px;
+}
+
+.sidebar-bottom {
+  margin: 35px 8px 0;
+  padding: 15px;
+  border: 1px solid #34435d;
+  border-radius: 12px;
+  color: #c5cede;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+main {
+  min-width: 0;
+  padding: 30px clamp(18px,3vw,42px);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+h1 { margin: 0; font-size: 27px; }
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dce6ff;
+  color: #244fc7;
+  font-weight: bold;
+}
+
+.welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  background: linear-gradient(110deg,#315fe4,#6689f2);
+  color: white;
+  border-radius: 17px;
+  padding: 22px 25px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow);
+}
+
+.welcome h2 { margin: 0 0 7px; font-size: 20px; }
+.welcome p { margin: 0; color: #e3eaff; font-size: 13px; }
+.welcome .home-symbol { font-size: 42px; opacity: .9; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 15px;
+  margin-bottom: 24px;
+}
+
+.stat, .panel, .room-card, .device-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.stat { padding: 17px; }
+
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  font-size: 17px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 25px;
+  margin: 12px 0 3px;
+}
+
+.stat small { color: var(--muted); font-size: 11px; }
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 13px;
+}
+
+h3 { margin: 0; font-size: 17px; }
+
+.section-head span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.rooms {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 14px;
+}
+
+.room-card {
+  padding: 17px;
+  cursor: pointer;
+  transition: .18s;
+}
+
+.room-card:hover {
+  transform: translateY(-2px);
+  border-color: #aebfff;
+}
+
+.room-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-emoji { font-size: 25px; }
+
+.room-card h4 {
+  margin: 13px 0 5px;
+  font-size: 15px;
+}
+
+.room-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.room-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 17px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pill {
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: bold;
+  background: #e8f8f1;
+  color: #12815b;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 15px;
+}
+
+.panel { padding: 18px; }
+
+.device-list {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 11px;
+}
+
+.device-card {
+  padding: 13px;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.device-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  background: #f0f3f8;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+}
+
+.device-info { min-width: 0; flex: 1; }
+
+.device-info b {
+  display: block;
+  font-size: 12px;
+}
+
+.device-info small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.toggle {
+  border: 0;
+  width: 37px;
+  height: 21px;
+  border-radius: 20px;
+  background: #cbd3df;
+  padding: 3px;
+  flex: 0 0 auto;
+}
+
+.toggle::after {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 15px;
+  background: white;
+  border-radius: 50%;
+  transition: .2s;
+}
+
+.toggle.on { background: var(--primary); }
+
+.toggle.on::after { transform: translateX(16px); }
+
+.scene-list { display: grid; gap: 10px; }
+
+.scene {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.scene:last-child { border: 0; }
+.scene b { font-size: 12px; display: block; }
+.scene small { color: var(--muted); font-size: 10px; }
+
+.run {
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: bold;
+  padding: 8px 11px;
+  font-size: 11px;
+}
+
+.security {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f7f9fc;
+  border-radius: 10px;
+  padding: 13px;
+  margin-top: 12px;
+}
+
+.security b { font-size: 12px; }
+
+.security small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+.primary-btn {
+  border: 0;
+  color: white;
+  background: var(--primary);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.muted-btn {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 12px;
+}
+
+.toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  background: #17243a;
+  color: white;
+  padding: 13px 17px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: .25s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(13,24,42,.48);
+  display: none;
+  place-items: center;
+  padding: 18px;
+}
+
+.modal-backdrop.show { display: grid; }
+
+.modal {
+  width: min(440px,100%);
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.modal-head h3 { font-size: 18px; }
+
+.close {
+  border: 0;
+  background: #f0f3f8;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+}
+
+.modal-devices { display: grid; gap: 10px; }
+
+.modal-devices .device-card {
+  border: 1px solid var(--border);
+}
+
+footer {
+  text-align: center;
+  color: #9aa4b2;
+  font-size: 10px;
+  padding: 25px 0 5px;
+}
+
+@media(max-width:1000px) {
+  .grid { grid-template-columns: repeat(2,1fr); }
+  .rooms { grid-template-columns: repeat(2,1fr); }
+}
+
+@media(max-width:720px) {
+  .layout { grid-template-columns: 1fr; }
+  aside { padding: 13px 14px; }
+  .brand { padding: 3px 8px 12px; }
+  .nav { display: flex; overflow: auto; gap: 4px; }
+  .nav-label, .sidebar-bottom { display: none; }
+  .nav button {
+    width: auto;
+    white-space: nowrap;
+    padding: 9px 11px;
+  }
+  .nav button span:last-child { font-size: 11px; }
+  main { padding: 22px 15px; }
+  .content-grid { grid-template-columns: 1fr; }
+  .welcome { padding: 18px; }
+  .profile span { display: none; }
+}
+
+@media(max-width:480px) {
+  h1 { font-size: 22px; }
+  .grid { gap: 9px; }
+  .stat { padding: 12px; }
+  .stat strong { font-size: 21px; }
+  .rooms { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .room-card { padding: 13px; }
+  .device-list { grid-template-columns: 1fr; }
+  .welcome .home-symbol { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<aside>
+  <div class="brand">
+    <div class="brand-icon">⌂</div>
+    <span>SmartNest</span>
+  </div>
+
+  <div class="nav-label">Workspace</div>
+
+  <nav class="nav">
+    <button class="active" data-page="Dashboard">
+      <span class="ico">▦</span><span>Dashboard</span>
+    </button>
+    <button data-page="Rooms">
+      <span class="ico">▣</span><span>Rooms</span>
+    </button>
+    <button data-page="Devices">
+      <span class="ico">⌁</span><span>Devices</span>
+    </button>
+    <button data-page="Scenes">
+      <span class="ico">☼</span><span>Scene routines</span>
+    </button>
+    <button data-page="Security">
+      <span class="ico">♢</span><span>Security</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <b>Home Gateway</b><br>
+    Connected · Wi-Fi<br>
+    <span style="color:#70d7ad">● System operational</span>
+  </div>
+</aside>
+
+<main>
+
+<header class="topbar">
+  <div>
+    <div class="eyebrow">Tuesday, November 17, 2026</div>
+    <h1 id="pageTitle">Dashboard</h1>
+  </div>
+
+  <div class="profile">
+    <div class="avatar">CR</div>
+    <span><b>Chaitra R</b><br>Home Owner</span>
+  </div>
+</header>
+
+<section class="welcome">
+  <div>
+    <h2>Welcome home, Chaitra! 👋</h2>
+    <p>Your home is connected and everything is running smoothly.</p>
+  </div>
+  <div class="home-symbol">⌂</div>
+</section>
+
+<section class="grid">
+
+  <div class="stat">
+    <div class="stat-top">Total devices <span class="stat-icon">⌁</span></div>
+    <strong id="totalDevices">8</strong>
+    <small>Across 3 rooms</small>
+  </div>
+
+  <div class="stat">
+    <div class="stat-top">Devices online <span class="stat-icon">●</span></div>
+    <strong id="onlineDevices">6</strong>
+    <small>Connected to gateway</small>
+  </div>
+
+  <div class="stat">
+    <div class="stat-top">Energy today <span class="stat-icon">⚡</span></div>
+    <strong>4.8 kWh</strong>
+    <small>Estimated usage</small>
+  </div>
+
+  <div class="stat">
+    <div class="stat-top">Security status <span class="stat-icon">♢</span></div>
+    <strong id="securityStat" style="font-size:20px">Disarmed</strong>
+    <small>Home protection</small>
+  </div>
+
+</section>
+
+<div class="section-head">
+  <h3>My rooms</h3>
+  <span>Click a room to view its devices</span>
+</div>
+
+<section class="rooms">
+
+  <article class="room-card" data-room="Living Room">
+    <div class="room-head">
+      <span class="room-emoji">🛋️</span>
+      <span class="pill">3 devices</span>
+    </div>
+    <h4>Living Room</h4>
+    <p>Comfort and entertainment</p>
+    <div class="room-foot">
+      <span>Floor 1</span>
+      <span>View devices →</span>
+    </div>
+  </article>
+
+  <article class="room-card" data-room="Bedroom">
+    <div class="room-head">
+      <span class="room-emoji">🛏️</span>
+      <span class="pill">3 devices</span>
+    </div>
+    <h4>Bedroom</h4>
+    <p>Rest and relaxation</p>
+    <div class="room-foot">
+      <span>Floor 1</span>
+      <span>View devices →</span>
+    </div>
+  </article>
+
+  <article class="room-card" data-room="Kitchen">
+    <div class="room-head">
+      <span class="room-emoji">🍳</span>
+      <span class="pill">2 devices</span>
+    </div>
+    <h4>Kitchen</h4>
+    <p>Everyday essentials</p>
+    <div class="room-foot">
+      <span>Floor 1</span>
+      <span>View devices →</span>
+    </div>
+  </article>
+
+</section>
+
+<div class="content-grid">
+
+  <section class="panel">
+
+    <div class="section-head" style="margin-top:0">
+      <h3>Smart devices</h3>
+      <button class="muted-btn" id="allDevicesBtn">View all</button>
+    </div>
+
+    <div class="device-list" id="deviceList">
+
+      <div class="device-card" data-device="Living Room Light">
+        <div class="device-icon">💡</div>
+        <div class="device-info">
+          <b>Living Room Light</b>
+          <small>Smart light · Living Room</small>
+        </div>
+        <button class="toggle on" aria-label="Toggle Living Room Light"></button>
+      </div>
+
+      <div class="device-card" data-device="Smart HVAC">
+        <div class="device-icon">❄️</div>
+        <div class="device-info">
+          <b>Smart HVAC</b>
+          <small>Temperature · Living Room</small>
+        </div>
+        <button class="toggle on" aria-label="Toggle Smart HVAC"></button>
+      </div>
+
+      <div class="device-card" data-device="Bedroom Light">
+        <div class="device-icon">💡</div>
+        <div class="device-info">
+          <b>Bedroom Light</b>
+          <small>Smart light · Bedroom</small>
+        </div>
+        <button class="toggle" aria-label="Toggle Bedroom Light"></button>
+      </div>
+
+      <div class="device-card" data-device="Smart Lock">
+        <div class="device-icon">🔒</div>
+        <div class="device-info">
+          <b>Main Door Lock</b>
+          <small>Smart lock · Bedroom</small>
+        </div>
+        <button class="toggle on" aria-label="Toggle Main Door Lock"></button>
+      </div>
+
+      <div class="device-card" data-device="Security Camera">
+        <div class="device-icon">📷</div>
+        <div class="device-info">
+          <b>Security Camera</b>
+          <small>Camera · Living Room</small>
+        </div>
+        <button class="toggle on" aria-label="Toggle Security Camera"></button>
+      </div>
+
+      <div class="device-card" data-device="Kitchen Light">
+        <div class="device-icon">💡</div>
+        <div class="device-info">
+          <b>Kitchen Light</b>
+          <small>Smart light · Kitchen</small>
+        </div>
+        <button class="toggle" aria-label="Toggle Kitchen Light"></button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="panel">
+
+    <div class="section-head" style="margin-top:0">
+      <h3>Scene routines</h3>
+      <span>Quick actions</span>
+    </div>
+
+    <div class="scene-list">
+
+      <div class="scene">
+        <div>
+          <b>🌅 Good Morning</b>
+          <small>Lights on · HVAC comfortable</small>
+        </div>
+        <button class="run" data-scene="Good Morning">Run</button>
+      </div>
+
+      <div class="scene">
+        <div>
+          <b>🎬 Movie Time</b>
+          <small>Dim lights · Relax mode</small>
+        </div>
+        <button class="run" data-scene="Movie Time">Run</button>
+      </div>
+
+      <div class="scene">
+        <div>
+          <b>🌙 Good Night</b>
+          <small>Turn off lights · Lock door</small>
+        </div>
+        <button class="run" data-scene="Good Night">Run</button>
+      </div>
+
+    </div>
+
+    <div class="security">
+      <div>
+        <b>Home security</b>
+        <small id="securityText">
+          Your security system is currently disarmed.
+        </small>
+      </div>
+      <button class="primary-btn" id="securityBtn">Arm system</button>
+    </div>
+
+  </section>
+
+</div>
+
+<footer>
+  SmartNest · Smart Home Automation System · Sample front-end demonstration
+</footer>
+
+</main>
+</div>
+
+<div class="modal-backdrop" id="roomModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Room devices</h3>
+      <button class="close" id="closeModal">×</button>
+    </div>
+    <div class="modal-devices" id="modalDevices"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Action completed</div>
+
+<script>
+
+const toast = document.getElementById('toast');
+let toastTimer;
+
+function notify(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2300);
+}
+
+function updateCounts() {
+  const toggles = [
+    ...document.querySelectorAll('#deviceList .toggle')
+  ];
+
+  document.getElementById('totalDevices').textContent =
+    toggles.length + 2;
+
+  document.getElementById('onlineDevices').textContent =
+    toggles.filter(t => t.classList.contains('on')).length;
+}
+
+function toggleDevice(button, name) {
+
+  button.classList.toggle('on');
+
+  notify(
+    name +
+    (button.classList.contains('on')
+      ? ' turned ON'
+      : ' turned OFF')
+  );
+
+  updateCounts();
+}
+
+document.querySelectorAll('#deviceList .toggle').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    toggleDevice(
+      btn,
+      btn.closest('.device-card').dataset.device
+    );
+
+  });
+
+});
+
+// Room device information
+
+const roomData = {
+
+  'Living Room': [
+    {icon:'💡', name:'Living Room Light', type:'SmartLight', on:true},
+    {icon:'❄️', name:'Smart HVAC', type:'SmartHVAC', on:true},
+    {icon:'📷', name:'Security Camera', type:'SecurityCamera', on:true}
+  ],
+
+  'Bedroom': [
+    {icon:'💡', name:'Bedroom Light', type:'SmartLight', on:false},
+    {icon:'🔒', name:'Main Door Lock', type:'SmartLock', on:true},
+    {icon:'🌡️', name:'Bedroom HVAC', type:'SmartHVAC', on:false}
+  ],
+
+  'Kitchen': [
+    {icon:'💡', name:'Kitchen Light', type:'SmartLight', on:false},
+    {icon:'🔌', name:'Smart Plug', type:'SmartAppliance', on:true}
+  ]
+
+};
+
+const modal = document.getElementById('roomModal');
+
+function openRoom(room) {
+
+  document.getElementById('modalTitle').textContent =
+    room + ' devices';
+
+  const list = document.getElementById('modalDevices');
+
+  list.innerHTML = '';
+
+  roomData[room].forEach(device => {
+
+    const card = document.createElement('div');
+
+    card.className = 'device-card';
+
+    card.innerHTML = `
+      <div class="device-icon">${device.icon}</div>
+
+      <div class="device-info">
+        <b>${device.name}</b>
+        <small>${device.type}</small>
+      </div>
+
+      <button class="toggle ${device.on ? 'on' : ''}"
+        aria-label="Toggle ${device.name}">
+      </button>
+    `;
+
+    card.querySelector('button').addEventListener('click', e => {
+
+      device.on = !device.on;
+
+      e.currentTarget.classList.toggle('on');
+
+      notify(
+        device.name +
+        (device.on ? ' turned ON' : ' turned OFF')
+      );
+
+    });
+
+    list.appendChild(card);
+
+  });
+
+  modal.classList.add('show');
+
+}
+
+document.querySelectorAll('.room-card').forEach(card => {
+
+  card.addEventListener('click', () => {
+    openRoom(card.dataset.room);
+  });
+
+});
+
+document.getElementById('closeModal').addEventListener('click', () => {
+  modal.classList.remove('show');
+});
+
+modal.addEventListener('click', e => {
+
+  if (e.target === modal) {
+    modal.classList.remove('show');
+  }
+
+});
+
+// Scene routines
+
+document.querySelectorAll('.run').forEach(button => {
+
+  button.addEventListener('click', () => {
+
+    const scene = button.dataset.scene;
+
+    if (scene === 'Good Night') {
+
+      document.querySelectorAll('#deviceList .toggle')
+        .forEach(t => t.classList.remove('on'));
+
+      notify('Good Night scene activated. Lights and devices switched off.');
+
+    }
+
+    else if (scene === 'Good Morning') {
+
+      document.querySelectorAll('#deviceList .toggle')
+        .forEach(t => t.classList.add('on'));
+
+      notify('Good Morning scene activated. Devices switched on.');
+
+    }
+
+    else {
+
+      document.querySelectorAll('#deviceList .toggle')
+        .forEach((t, i) => {
+          t.classList.toggle('on', i === 0 || i === 4);
+        });
+
+      notify('Movie Time scene activated. Relax mode is ready.');
+
+    }
+
+    updateCounts();
+
+  });
+
+});
+
+// Security system
+
+let armed = false;
+
+document.getElementById('securityBtn').addEventListener('click', () => {
+
+  armed = !armed;
+
+  document.getEleme
+  </script>
+  </body>
+  </html>
+  
